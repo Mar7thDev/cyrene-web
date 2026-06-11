@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { deviceCodes, launcherTokens, users } from "@/db/schema";
 import { newLauncherToken, sha256 } from "@/lib/launcher-auth";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { isBanned } from "@/lib/bans";
 
 export const dynamic = "force-dynamic";
 
@@ -39,11 +40,18 @@ export async function POST(req: Request) {
   if (user.status === "banned") return NextResponse.json({ error: "account_banned" }, { status: 403 });
   if (user.status === "pending") return NextResponse.json({ error: "account_pending" }, { status: 403 });
 
+  const ip = clientIp(req);
+  if (await isBanned({ deviceId: dc.clientInfo?.deviceId, ip })) {
+    return NextResponse.json({ error: "account_banned" }, { status: 403 });
+  }
+
   const token = newLauncherToken();
   await db.insert(launcherTokens).values({
     userId: user.id,
     tokenHash: sha256(token),
     deviceName: dc.clientInfo?.hostname || null,
+    deviceId: dc.clientInfo?.deviceId || null,
+    lastIp: ip === "unknown" ? null : ip,
   });
   await db.update(deviceCodes).set({ status: "consumed" }).where(eq(deviceCodes.id, dc.id));
 

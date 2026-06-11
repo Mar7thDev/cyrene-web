@@ -2,10 +2,21 @@ import NextAuth from "next-auth";
 import Discord from "next-auth/providers/discord";
 import GitHub from "next-auth/providers/github";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { headers } from "next/headers";
 import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { accounts, sessions, users, verificationTokens } from "@/db/schema";
+import { isBanned } from "@/lib/bans";
 import { getRegistrationMode } from "@/lib/settings";
+
+async function requestIp(): Promise<string | null> {
+  try {
+    const h = await headers();
+    return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || null;
+  } catch {
+    return null; // not in a request scope
+  }
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db, {
@@ -20,6 +31,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ account }) {
       if (!account) return false;
+      if (await isBanned({ ip: await requestIp() })) return "/login?error=banned";
       const linked = await db.query.accounts.findFirst({
         where: and(
           eq(accounts.provider, account.provider),

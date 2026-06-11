@@ -18,6 +18,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="flex gap-2 mb-6">
           <Link href="/admin/users" className="btn btn-sm btn-ghost border border-pink-200 bg-white/60">Users</Link>
           <Link href="/admin/invites" className="btn btn-sm btn-ghost border border-pink-200 bg-white/60">Invites</Link>
+          <Link href="/admin/bans" className="btn btn-sm btn-ghost border border-pink-200 bg-white/60">Bans</Link>
           <Link href="/admin/news" className="btn btn-sm btn-ghost border border-pink-200 bg-white/60">News</Link>
           <Link href="/admin/settings" className="btn btn-sm btn-ghost border border-pink-200 bg-white/60">Settings</Link>
         </div>

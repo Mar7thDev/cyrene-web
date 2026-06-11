@@ -2,9 +2,10 @@ import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { deviceCodes } from "@/db/schema";
-import { sha256 } from "@/lib/launcher-auth";
+import { normalizeDeviceId, sha256 } from "@/lib/launcher-auth";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { getBaseUrl } from "@/lib/base-url";
+import { isBanned } from "@/lib/bans";
 
 export const dynamic = "force-dynamic";
 
@@ -25,15 +26,23 @@ function userCode(): string {
 }
 
 export async function POST(req: Request) {
-  if (!rateLimit(`device-code:${clientIp(req)}`, 10, 60_000)) {
+  const ip = clientIp(req);
+  if (!rateLimit(`device-code:${ip}`, 10, 60_000)) {
     return NextResponse.json({ error: "slow_down" }, { status: 429 });
   }
 
   const body = await req.json().catch(() => ({}));
+  const deviceId = normalizeDeviceId(body.device_id);
+  if (await isBanned({ deviceId, ip })) {
+    return NextResponse.json({ error: "banned" }, { status: 403 });
+  }
+
   const clientInfo = {
     version: String(body.version ?? "").slice(0, 40),
     os: String(body.os ?? "").slice(0, 40),
     hostname: String(body.hostname ?? "").slice(0, 80),
+    deviceId: deviceId ?? undefined,
+    ip,
   };
 
   const deviceCode = randomBytes(32).toString("hex");

@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { invites, launcherTokens, sessions, users, type UserRole, type UserStatus, type RegistrationMode } from "@/db/schema";
+import { bans, invites, launcherTokens, sessions, users, type BanKind, type UserRole, type UserStatus, type RegistrationMode } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin";
+import { banUserArtifacts, unbanUserArtifacts } from "@/lib/bans";
 import { generateInviteCode } from "@/lib/invites";
 import { setSetting } from "@/lib/settings";
 
@@ -13,14 +14,39 @@ export async function setUserStatus(userId: string, status: UserStatus) {
   if (userId === session.user.id) throw new Error("You cannot change your own status");
   await db.update(users).set({ status }).where(eq(users.id, userId));
   if (status === "banned") {
-    // Revoke web sessions and launcher tokens immediately.
+    // Revoke web sessions and launcher tokens immediately, and blocklist
+    // every device fingerprint / IP this account was seen on.
     await db.delete(sessions).where(eq(sessions.userId, userId));
     await db
       .update(launcherTokens)
       .set({ revokedAt: new Date() })
       .where(eq(launcherTokens.userId, userId));
+    await banUserArtifacts(userId, "account banned");
+  } else {
+    // Un-banning lifts the device/IP bans created for this account.
+    await unbanUserArtifacts(userId);
   }
   revalidatePath("/admin/users");
+  revalidatePath("/admin/bans");
+}
+
+export async function addBan(formData: FormData) {
+  const session = await requireAdmin();
+  const kind = String(formData.get("kind") ?? "") as BanKind;
+  const value = String(formData.get("value") ?? "").trim();
+  const reason = String(formData.get("reason") ?? "").trim() || null;
+  if ((kind !== "device" && kind !== "ip") || !value) throw new Error("Invalid ban");
+  await db
+    .insert(bans)
+    .values({ kind, value, reason: reason ?? `added by ${session.user.name}` })
+    .onConflictDoNothing();
+  revalidatePath("/admin/bans");
+}
+
+export async function removeBan(banId: string) {
+  await requireAdmin();
+  await db.delete(bans).where(eq(bans.id, banId));
+  revalidatePath("/admin/bans");
 }
 
 export async function setUserRole(userId: string, role: UserRole) {

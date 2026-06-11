@@ -6,6 +6,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -13,6 +14,7 @@ export type UserRole = "user" | "admin";
 export type UserStatus = "active" | "pending" | "banned";
 export type RegistrationMode = "open" | "invite" | "closed";
 export type DeviceCodeStatus = "pending" | "approved" | "denied" | "expired" | "consumed";
+export type BanKind = "device" | "ip";
 
 export const users = pgTable("user", {
   id: text("id")
@@ -28,6 +30,7 @@ export const users = pgTable("user", {
   launcherVersion: text("launcher_version"),
   os: text("os"),
   lastSeenAt: timestamp("last_seen_at", { mode: "date" }),
+  lastIp: text("last_ip"),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
 });
 
@@ -115,7 +118,13 @@ export const deviceCodes = pgTable("device_code", {
   userCode: text("user_code").notNull().unique(),
   status: text("status").$type<DeviceCodeStatus>().notNull().default("pending"),
   userId: text("user_id").references(() => users.id, { onDelete: "cascade" }),
-  clientInfo: jsonb("client_info").$type<{ version?: string; os?: string; hostname?: string }>(),
+  clientInfo: jsonb("client_info").$type<{
+    version?: string;
+    os?: string;
+    hostname?: string;
+    deviceId?: string;
+    ip?: string;
+  }>(),
   expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
 });
@@ -129,12 +138,32 @@ export const launcherTokens = pgTable("launcher_token", {
     .references(() => users.id, { onDelete: "cascade" }),
   tokenHash: text("token_hash").notNull().unique(),
   deviceName: text("device_name"),
+  deviceId: text("device_id"),
+  lastIp: text("last_ip"),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   lastUsedAt: timestamp("last_used_at", { mode: "date" }),
   revokedAt: timestamp("revoked_at", { mode: "date" }),
 });
 
+// Device / IP blocklist. Rows are added automatically when an account is
+// banned and checked on every launcher API call and web sign-in.
+export const bans = pgTable(
+  "ban",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    kind: text("kind").$type<BanKind>().notNull(),
+    value: text("value").notNull(),
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+    reason: text("reason"),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("ban_kind_value_idx").on(t.kind, t.value)]
+);
+
 export type User = typeof users.$inferSelect;
 export type Invite = typeof invites.$inferSelect;
 export type NewsPost = typeof news.$inferSelect;
 export type LauncherToken = typeof launcherTokens.$inferSelect;
+export type Ban = typeof bans.$inferSelect;
