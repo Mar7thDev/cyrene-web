@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { getLocale } from "@/lib/i18n";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -13,9 +14,10 @@ export const metadata: Metadata = {
   icons: { icon: "/appicon.png" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
   return (
-    <html lang="en" data-theme="light">
+    <html lang={locale} data-theme="light">
       <body className={inter.className}>
         <div className="ambient" aria-hidden="true">
           <div className="ambient-blob pink" />

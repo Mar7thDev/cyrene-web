@@ -3,13 +3,12 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
 import Navbar from "@/components/navbar";
+import { getDict } from "@/lib/i18n";
 
-const ERRORS: Record<string, string> = {
-  closed: "Registration is currently closed.",
-  banned: "This account has been banned.",
-};
-
-export const metadata = { title: "Sign in" };
+export async function generateMetadata() {
+  const { t } = await getDict();
+  return { title: t.login.metaTitle };
+}
 
 export default async function LoginPage({
   searchParams,
@@ -17,10 +16,16 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; callbackUrl?: string }>;
 }) {
   const session = await auth();
+  const { t } = await getDict();
+  const l = t.login;
   const { error, callbackUrl } = await searchParams;
   if (session?.user) redirect(callbackUrl ?? "/profile");
 
   const target = callbackUrl ?? "/profile";
+  const errors: Record<string, string> = {
+    closed: l.errors.closed,
+    banned: l.errors.banned,
+  };
 
   return (
     <>
@@ -30,13 +35,13 @@ export default async function LoginPage({
           <div className="flex flex-col items-center gap-3 text-center">
             <Image src="/appicon.png" alt="" width={56} height={56} className="rounded-2xl shadow-lg shadow-pink-200/60" />
             <h1 className="text-2xl font-bold tracking-tight">
-              Welcome to <span className="text-brand">Cyrene</span>
+              {l.welcomeA} <span className="text-brand">{l.welcomeB}</span>
             </h1>
-            <p className="text-sm text-base-content/50">Sign in to sync your launcher and manage your account.</p>
+            <p className="text-sm text-base-content/50">{l.subtitle}</p>
           </div>
 
           {error && (
-            <div className="alert alert-error text-sm">{ERRORS[error] ?? "Sign-in failed. Please try again."}</div>
+            <div className="alert alert-error text-sm">{errors[error] ?? l.errors.default}</div>
           )}
 
           <form
@@ -52,7 +57,7 @@ export default async function LoginPage({
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor" aria-hidden="true">
                 <path d="M20.317 4.369A19.79 19.79 0 0 0 16.558 3.2a.075.075 0 0 0-.079.037c-.21.371-.444.857-.608 1.234a18.27 18.27 0 0 0-5.487 0 12.78 12.78 0 0 0-.617-1.234.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 5.928 4.37a.07.07 0 0 0-.032.027C2.533 9.046 1.622 13.58 2.07 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.873-1.295 1.226-1.994a.076.076 0 0 0-.041-.105 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.009c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.891.077.077 0 0 0-.041.106c.36.698.772 1.363 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .031-.056c.5-5.177-.838-9.674-3.549-13.66a.06.06 0 0 0-.031-.028zM8.02 15.331c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.956-2.418 2.157-2.418 1.21 0 2.175 1.094 2.157 2.418 0 1.334-.956 2.42-2.157 2.42zm7.974 0c-1.182 0-2.156-1.085-2.156-2.419 0-1.333.955-2.418 2.156-2.418 1.21 0 2.176 1.094 2.157 2.418 0 1.334-.946 2.42-2.157 2.42z" />
               </svg>
-              Continue with Discord
+              {l.continueDiscord}
             </button>
           </form>
           <form
@@ -68,14 +73,16 @@ export default async function LoginPage({
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor" aria-hidden="true">
                 <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
               </svg>
-              Continue with GitHub
+              {l.continueGithub}
             </button>
           </form>
 
           <p className="mt-1 text-center text-xs leading-relaxed text-base-content/40">
-            By signing in you agree to our{" "}
-            <Link href="/terms" className="link-hover underline">Terms</Link> and{" "}
-            <Link href="/privacy" className="link-hover underline">Privacy Policy</Link>.
+            {l.agreeBefore}
+            <Link href="/terms" className="link-hover underline">{l.agreeTerms}</Link>
+            {l.agreeMiddle}
+            <Link href="/privacy" className="link-hover underline">{l.agreePrivacy}</Link>
+            {l.agreeAfter}
           </p>
         </div>
       </main>

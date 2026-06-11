@@ -4,16 +4,26 @@ import { CalendarDays, Newspaper, Pin } from "lucide-react";
 import { db } from "@/db";
 import { news } from "@/db/schema";
 import Reveal from "@/components/reveal";
+import { getDict } from "@/lib/i18n";
 
-export const metadata = { title: "News" };
+export async function generateMetadata() {
+  const { t } = await getDict();
+  return { title: t.news.metaTitle };
+}
 export const dynamic = "force-dynamic";
 
-function fmtDate(d: Date | null) {
+function fmtDate(d: Date | null, locale: string) {
   if (!d) return "";
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  return d.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 export default async function NewsListPage() {
+  const { locale, t } = await getDict();
+  const n = t.news;
   const posts = await db.query.news.findMany({
     where: and(eq(news.published, true)),
     orderBy: [desc(news.pinned), desc(news.publishedAt)],
@@ -24,15 +34,15 @@ export default async function NewsListPage() {
     <div>
       <div className="fade-up pt-6 text-center">
         <h1 className="text-4xl font-extrabold tracking-tight">
-          <span className="text-brand">News</span>
+          <span className="text-brand">{n.title}</span>
         </h1>
-        <p className="mt-3 text-base-content/50">Announcements and updates from the team.</p>
+        <p className="mt-3 text-base-content/50">{n.subtitle}</p>
       </div>
 
       {posts.length === 0 ? (
         <div className="fade-up d2 mx-auto mt-16 flex max-w-sm flex-col items-center gap-3 text-center text-base-content/40">
           <Newspaper className="h-10 w-10" />
-          <p>Nothing here yet — check back soon.</p>
+          <p>{n.empty}</p>
         </div>
       ) : (
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -55,7 +65,7 @@ export default async function NewsListPage() {
                     )}
                     {p.pinned && (
                       <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-pink-500/90 px-2.5 py-1 text-xs font-medium text-white shadow-md backdrop-blur-sm">
-                        <Pin size={11} /> Pinned
+                        <Pin size={11} /> {n.pinned}
                       </span>
                     )}
                   </div>
@@ -67,7 +77,7 @@ export default async function NewsListPage() {
                       <p className="mt-2 text-sm leading-relaxed text-base-content/50 line-clamp-2">{p.summary}</p>
                     )}
                     <p className="mt-3 flex items-center gap-1.5 text-xs text-base-content/40">
-                      <CalendarDays size={13} /> {fmtDate(p.publishedAt)}
+                      <CalendarDays size={13} /> {fmtDate(p.publishedAt, locale)}
                     </p>
                   </div>
                 </article>

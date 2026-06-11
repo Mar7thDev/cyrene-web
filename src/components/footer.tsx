@@ -1,37 +1,41 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getDict } from "@/lib/i18n";
 
 const RELEASES_URL = "https://github.com/Mar7thDev/CyreneLauncher/releases/latest";
 const GITHUB_URL = "https://github.com/Mar7thDev/CyreneLauncher";
 const DISCORD_URL = "https://discord.gg/CyreneEchoes";
 
-const columns: { title: string; links: { label: string; href: string; external?: boolean }[] }[] = [
-  {
-    title: "Product",
-    links: [
-      { label: "Download", href: RELEASES_URL, external: true },
-      { label: "News", href: "/news" },
-      { label: "Docs", href: "/docs" },
-    ],
-  },
-  {
-    title: "Community",
-    links: [
-      { label: "Discord", href: DISCORD_URL, external: true },
-      { label: "GitHub", href: GITHUB_URL, external: true },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "About", href: "/about" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Privacy Policy", href: "/privacy" },
-    ],
-  },
-];
+export default async function Footer() {
+  const { t } = await getDict();
+  const f = t.footer;
 
-export default function Footer() {
+  const columns: { title: string; links: { label: string; href: string; external?: boolean }[] }[] = [
+    {
+      title: f.product,
+      links: [
+        { label: f.download, href: RELEASES_URL, external: true },
+        { label: f.news, href: "/news" },
+        { label: f.docs, href: "/docs" },
+      ],
+    },
+    {
+      title: f.community,
+      links: [
+        { label: f.discord, href: DISCORD_URL, external: true },
+        { label: f.github, href: GITHUB_URL, external: true },
+      ],
+    },
+    {
+      title: f.legal,
+      links: [
+        { label: f.about, href: "/about" },
+        { label: f.terms, href: "/terms" },
+        { label: f.privacy, href: "/privacy" },
+      ],
+    },
+  ];
+
   return (
     <footer className="mt-24 border-t border-pink-100/70 bg-white/40 backdrop-blur-xl">
       <div className="mx-auto max-w-5xl px-6 py-12">
@@ -42,7 +46,7 @@ export default function Footer() {
               <span className="text-brand font-bold tracking-tight">Cyrene Launcher</span>
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-base-content/45">
-              A clean, fast launcher for Honkai: Star Rail private servers.
+              {f.tagline}
             </p>
           </div>
 
@@ -78,8 +82,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-pink-100/70 pt-6 text-xs text-base-content/40 sm:flex-row">
-          <p>© {new Date().getFullYear()} Mar7thDev. Not affiliated with HoYoverse.</p>
-          <p>Honkai: Star Rail is a trademark of COGNOSPHERE PTE. LTD.</p>
+          <p>{f.copyright.replace("{year}", String(new Date().getFullYear()))}</p>
+          <p>{f.trademark}</p>
         </div>
       </div>
     </footer>

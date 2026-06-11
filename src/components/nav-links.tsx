@@ -2,21 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { buildNavLinks, isActive, type NavLabels } from "./nav-config";
 
-export default function NavLinks({ isAdmin }: { isAdmin: boolean }) {
+export default function NavLinks({ isAdmin, labels }: { isAdmin: boolean; labels: NavLabels }) {
   const pathname = usePathname();
-  const links = [
-    { href: "/", label: "Home" },
-    { href: "/news", label: "News" },
-    { href: "/docs", label: "Docs" },
-    { href: "/about", label: "About" },
-    ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
-  ];
+  const links = buildNavLinks(labels, isAdmin);
 
   return (
     <nav className="flex items-center gap-1">
       {links.map(({ href, label }) => {
-        const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+        const active = isActive(pathname, href);
         return (
           <Link
             key={href}

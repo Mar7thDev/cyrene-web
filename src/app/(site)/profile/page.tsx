@@ -4,16 +4,23 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { accounts, users } from "@/db/schema";
 import { isOnline } from "@/lib/presence";
+import { getDict } from "@/lib/i18n";
 
-export const metadata = { title: "Profile" };
+export async function generateMetadata() {
+  const { t } = await getDict();
+  return { title: t.profile.metaTitle };
+}
 
 export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user) redirect("/login?callbackUrl=/profile");
+  const { t } = await getDict();
+  const p = t.profile;
 
   const user = await db.query.users.findFirst({ where: eq(users.id, session.user.id) });
   if (!user) redirect("/login");
   const linked = await db.query.accounts.findMany({ where: eq(accounts.userId, user.id) });
+  const statusLabel = p.status[user.status as keyof typeof p.status] ?? user.status;
 
   return (
     <div className="fade-up mx-auto max-w-lg pt-6">
@@ -30,28 +37,29 @@ export default async function ProfilePage() {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-bold tracking-tight">{user.name}</h1>
             <span className={`badge badge-sm ${user.status === "active" ? "badge-success" : user.status === "pending" ? "badge-warning" : "badge-error"} badge-soft`}>
-              {user.status}
+              {statusLabel}
             </span>
-            {user.role === "admin" && <span className="badge badge-sm badge-secondary badge-soft">admin</span>}
+            {user.role === "admin" && <span className="badge badge-sm badge-secondary badge-soft">{p.admin}</span>}
             {isOnline(user.lastSeenAt) && (
               <span className="badge badge-sm badge-info badge-soft gap-1">
-                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-sky-500" /> online
+                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-sky-500" /> {p.online}
               </span>
             )}
           </div>
 
           {user.status === "pending" && (
             <div className="alert alert-warning mt-4 text-sm">
-              Your account is awaiting activation. Enter an invite code on the{" "}
-              <a href="/activate" className="link">activation page</a>.
+              {p.pendingBefore}
+              <a href="/activate" className="link">{p.pendingLink}</a>
+              {p.pendingAfter}
             </div>
           )}
 
           <div className="mt-6 space-y-2.5 text-sm">
-            <Row label="Linked accounts" value={linked.map((a) => a.provider).join(", ") || "—"} />
-            <Row label="Joined" value={user.createdAt.toISOString().slice(0, 10)} />
-            <Row label="Last seen" value={user.lastSeenAt ? user.lastSeenAt.toISOString().replace("T", " ").slice(0, 16) + " UTC" : "—"} />
-            <Row label="Launcher" value={user.launcherVersion ? `${user.launcherVersion} (${user.os ?? "?"})` : "Not linked yet"} />
+            <Row label={p.linkedAccounts} value={linked.map((a) => a.provider).join(", ") || "—"} />
+            <Row label={p.joined} value={user.createdAt.toISOString().slice(0, 10)} />
+            <Row label={p.lastSeen} value={user.lastSeenAt ? user.lastSeenAt.toISOString().replace("T", " ").slice(0, 16) + " UTC" : "—"} />
+            <Row label={p.launcher} value={user.launcherVersion ? `${user.launcherVersion} (${user.os ?? "?"})` : p.notLinked} />
           </div>
         </div>
       </div>
