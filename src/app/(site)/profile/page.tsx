@@ -16,39 +16,43 @@ export default async function ProfilePage() {
   const linked = await db.query.accounts.findMany({ where: eq(accounts.userId, user.id) });
 
   return (
-    <div className="mx-auto max-w-lg">
-      <div className="bg-white/70 backdrop-blur-xl border border-pink-200/60 rounded-2xl shadow-xl shadow-pink-100/50 p-8">
-        <div className="flex items-center gap-4 mb-6">
+    <div className="fade-up mx-auto max-w-lg pt-6">
+      <div className="glass-card overflow-hidden">
+        <div className="h-24 bg-gradient-to-r from-pink-400/25 via-violet-400/25 to-sky-400/25" />
+        <div className="-mt-10 px-8 pb-8">
           <div className="avatar">
-            <div className="w-16 rounded-full ring-2 ring-pink-200">
+            <div className="w-20 rounded-full shadow-lg ring-4 ring-white/90">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={user.image ?? "/avatar-fallback.svg"} alt={user.name ?? "avatar"} />
             </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold">{user.name}</h1>
-            <div className="flex gap-2 mt-1">
-              <span className={`badge badge-sm ${user.status === "active" ? "badge-success" : user.status === "pending" ? "badge-warning" : "badge-error"}`}>
-                {user.status}
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-bold tracking-tight">{user.name}</h1>
+            <span className={`badge badge-sm ${user.status === "active" ? "badge-success" : user.status === "pending" ? "badge-warning" : "badge-error"} badge-soft`}>
+              {user.status}
+            </span>
+            {user.role === "admin" && <span className="badge badge-sm badge-secondary badge-soft">admin</span>}
+            {isOnline(user.lastSeenAt) && (
+              <span className="badge badge-sm badge-info badge-soft gap-1">
+                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-sky-500" /> online
               </span>
-              {user.role === "admin" && <span className="badge badge-sm badge-secondary">admin</span>}
-              {isOnline(user.lastSeenAt) && <span className="badge badge-sm badge-info">online</span>}
+            )}
+          </div>
+
+          {user.status === "pending" && (
+            <div className="alert alert-warning mt-4 text-sm">
+              Your account is awaiting activation. Enter an invite code on the{" "}
+              <a href="/activate" className="link">activation page</a>.
             </div>
-          </div>
-        </div>
+          )}
 
-        {user.status === "pending" && (
-          <div className="alert alert-warning text-sm mb-4">
-            Your account is awaiting activation. Enter an invite code on the{" "}
-            <a href="/activate" className="link">activation page</a>.
+          <div className="mt-6 space-y-2.5 text-sm">
+            <Row label="Linked accounts" value={linked.map((a) => a.provider).join(", ") || "—"} />
+            <Row label="Joined" value={user.createdAt.toISOString().slice(0, 10)} />
+            <Row label="Last seen" value={user.lastSeenAt ? user.lastSeenAt.toISOString().replace("T", " ").slice(0, 16) + " UTC" : "—"} />
+            <Row label="Launcher" value={user.launcherVersion ? `${user.launcherVersion} (${user.os ?? "?"})` : "Not linked yet"} />
           </div>
-        )}
-
-        <div className="space-y-2 text-sm">
-          <Row label="Linked accounts" value={linked.map((a) => a.provider).join(", ") || "—"} />
-          <Row label="Joined" value={user.createdAt.toISOString().slice(0, 10)} />
-          <Row label="Last seen" value={user.lastSeenAt ? user.lastSeenAt.toISOString().replace("T", " ").slice(0, 16) + " UTC" : "—"} />
-          <Row label="Launcher" value={user.launcherVersion ? `${user.launcherVersion} (${user.os ?? "?"})` : "Not linked yet"} />
         </div>
       </div>
     </div>
@@ -57,9 +61,9 @@ export default async function ProfilePage() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-4 border-b border-pink-100/60 pb-2">
-      <span className="text-base-content/50">{label}</span>
-      <span className="font-medium text-right">{value}</span>
+    <div className="flex justify-between gap-4 border-b border-pink-100/60 pb-2.5">
+      <span className="text-base-content/45">{label}</span>
+      <span className="text-right font-medium">{value}</span>
     </div>
   );
 }

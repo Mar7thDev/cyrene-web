@@ -9,8 +9,8 @@ const ERRORS: Record<string, string> = {
 
 export default function InviteForm({ error, next }: { error?: string; next?: string }) {
   return (
-    <div className="bg-white/70 backdrop-blur-xl border border-pink-200/60 rounded-2xl shadow-xl shadow-pink-100/50 p-8 flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-center bg-clip-text text-transparent bg-linear-to-r from-pink-500 to-sky-500">
+    <div className="glass-card fade-up flex flex-col gap-4 p-8">
+      <h1 className="text-brand text-center text-2xl font-bold tracking-tight">
         Activate your account
       </h1>
       <p className="text-sm text-base-content/60 text-center">
@@ -27,7 +27,7 @@ export default function InviteForm({ error, next }: { error?: string; next?: str
           className="input input-bordered w-full font-mono text-center uppercase"
           autoComplete="off"
         />
-        <button className="btn bg-linear-to-r from-pink-500 to-sky-500 border-none text-white">Activate</button>
+        <button className="btn btn-brand rounded-xl">Activate</button>
       </form>
     </div>
   );

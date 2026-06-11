@@ -58,7 +58,7 @@ export default function DeviceCard({
           <button className="btn btn-outline w-full">Deny</button>
         </form>
         <form action={approveDeviceAction.bind(null, device.userCode)} className="flex-1">
-          <button className="btn w-full bg-linear-to-r from-pink-500 to-sky-500 border-none text-white">
+          <button className="btn btn-brand w-full rounded-xl">
             Approve
           </button>
         </form>
@@ -69,8 +69,8 @@ export default function DeviceCard({
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white/70 backdrop-blur-xl border border-pink-200/60 rounded-2xl shadow-xl shadow-pink-100/50 p-8 flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-center bg-clip-text text-transparent bg-linear-to-r from-pink-500 to-sky-500">
+    <div className="glass-card fade-up flex flex-col gap-4 p-8">
+      <h1 className="text-brand text-center text-2xl font-bold tracking-tight">
         Launcher sign-in
       </h1>
       {children}

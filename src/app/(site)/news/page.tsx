@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { and, desc, eq } from "drizzle-orm";
-import { Pin } from "lucide-react";
+import { CalendarDays, Newspaper, Pin } from "lucide-react";
 import { db } from "@/db";
 import { news } from "@/db/schema";
+import Reveal from "@/components/reveal";
 
 export const metadata = { title: "News" };
 export const dynamic = "force-dynamic";
+
+function fmtDate(d: Date | null) {
+  if (!d) return "";
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
 
 export default async function NewsListPage() {
   const posts = await db.query.news.findMany({
@@ -16,34 +22,57 @@ export default async function NewsListPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 bg-clip-text text-transparent bg-linear-to-r from-pink-500 to-sky-500">
-        News
-      </h1>
+      <div className="fade-up pt-6 text-center">
+        <h1 className="text-4xl font-extrabold tracking-tight">
+          <span className="text-brand">News</span>
+        </h1>
+        <p className="mt-3 text-base-content/50">Announcements and updates from the team.</p>
+      </div>
+
       {posts.length === 0 ? (
-        <p className="text-base-content/50">Nothing here yet.</p>
+        <div className="fade-up d2 mx-auto mt-16 flex max-w-sm flex-col items-center gap-3 text-center text-base-content/40">
+          <Newspaper className="h-10 w-10" />
+          <p>Nothing here yet — check back soon.</p>
+        </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((p) => (
-            <Link
-              key={p.id}
-              href={`/news/${p.slug}`}
-              className="bg-white/70 backdrop-blur-xl border border-pink-200/60 rounded-2xl shadow-md shadow-pink-100/40 overflow-hidden hover:shadow-xl hover:-translate-y-0.5 transition-all"
-            >
-              {p.coverUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.coverUrl} alt="" className="w-full h-36 object-cover" />
-              )}
-              <div className="p-4">
-                <div className="flex items-center gap-2">
-                  {p.pinned && <Pin size={14} className="text-pink-500 shrink-0" />}
-                  <h2 className="font-semibold line-clamp-2">{p.title}</h2>
-                </div>
-                {p.summary && <p className="text-sm text-base-content/50 mt-1 line-clamp-2">{p.summary}</p>}
-                <p className="text-xs text-base-content/40 mt-2">
-                  {p.publishedAt?.toISOString().slice(0, 10)}
-                </p>
-              </div>
-            </Link>
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {posts.map((p, i) => (
+            <Reveal key={p.id} delay={(i % 3) * 0.08}>
+              <Link href={`/news/${p.slug}`} className="group block h-full">
+                <article className="glass-card glass-card-hover h-full overflow-hidden">
+                  <div className="relative h-36 overflow-hidden">
+                    {p.coverUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={p.coverUrl}
+                        alt=""
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-pink-400/15 via-violet-400/15 to-sky-400/15">
+                        <Newspaper className="h-8 w-8 text-pink-400/50" />
+                      </div>
+                    )}
+                    {p.pinned && (
+                      <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-pink-500/90 px-2.5 py-1 text-xs font-medium text-white shadow-md backdrop-blur-sm">
+                        <Pin size={11} /> Pinned
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-5">
+                    <h2 className="font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-pink-600">
+                      {p.title}
+                    </h2>
+                    {p.summary && (
+                      <p className="mt-2 text-sm leading-relaxed text-base-content/50 line-clamp-2">{p.summary}</p>
+                    )}
+                    <p className="mt-3 flex items-center gap-1.5 text-xs text-base-content/40">
+                      <CalendarDays size={13} /> {fmtDate(p.publishedAt)}
+                    </p>
+                  </div>
+                </article>
+              </Link>
+            </Reveal>
           ))}
         </div>
       )}
