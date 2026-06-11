@@ -13,12 +13,32 @@ html {
 }
 
 body {
+  /* Inter for Latin, then native CJK faces so Chinese renders cleanly
+     instead of falling back to the browser's default serif. */
+  font-family: var(--font-inter), "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei",
+    "Hiragino Sans GB", "Noto Sans SC", "Source Han Sans SC", "WenQuanYi Micro Hei",
+    system-ui, sans-serif;
   background: var(--bg-base);
   min-height: 100vh;
   color: #2b2937;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+}
+
+/* ---------- Chinese typography ----------
+   Latin headings use tight tracking; on CJK that reads cramped, so relax it
+   and give big headings a touch more line-height. */
+html[lang="zh"] h1,
+html[lang="zh"] h2,
+html[lang="zh"] h3,
+html[lang="zh"] .tracking-tight,
+html[lang="zh"] .tracking-tighter {
+  letter-spacing: 0;
+}
+
+html[lang="zh"] h1 {
+  line-height: 1.2;
 }
 
 ::selection {

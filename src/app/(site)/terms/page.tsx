@@ -13,7 +13,7 @@ export default async function TermsPage() {
 
   return (
     <LegalPage
-      title={<>{tt.titleA} <span className="text-brand">{tt.titleB}</span></>}
+      title={<>{tt.titleA}<span className="text-brand">{tt.titleB}</span></>}
       updated={updated}
     >
       {locale === "zh" ? <TermsZh /> : <TermsEn />}

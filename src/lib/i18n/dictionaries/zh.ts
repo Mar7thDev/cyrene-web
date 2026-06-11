@@ -41,7 +41,7 @@ export const zh: Dictionary = {
 
     featuresTitleA: "一切尽在",
     featuresTitleB: "一处",
-    featuresSubtitle: "运行私服客户端中那些繁琐的部分，都为你处理好了。",
+    featuresSubtitle: "运行私服客户端的繁琐步骤，都替你处理好了。",
     features: {
       oneClick: {
         title: "一键开玩",
@@ -86,7 +86,7 @@ export const zh: Dictionary = {
       },
     },
 
-    ctaTitle: "随时为你准备就绪。",
+    ctaTitle: "就等你了。",
     ctaSubtitle: "下载启动器，加入社区，回到群星之间。",
     ctaDownload: "下载",
     ctaDiscord: "加入我们的 Discord",

@@ -23,6 +23,8 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Run on page routes only — skip API, Next internals, and static assets.
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+  // Run on page routes only. Exclude all of `_next` (incl. the webpack-hmr / RSC
+  // dev channels — otherwise middleware runs on every hot update and slows it
+  // down), API routes, the favicon, and anything with a file extension.
+  matcher: ["/((?!api|_next|favicon.ico|.*\\..*).*)"],
 };

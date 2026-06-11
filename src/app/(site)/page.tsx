@@ -87,7 +87,7 @@ export default async function LandingPage() {
       <section>
         <Reveal>
           <h2 className="text-center text-3xl font-bold tracking-tight">
-            {h.featuresTitleA} <span className="text-brand">{h.featuresTitleB}</span>
+            {h.featuresTitleA}<span className="text-brand">{h.featuresTitleB}</span>
           </h2>
           <p className="mx-auto mt-3 max-w-md text-center text-base-content/50">
             {h.featuresSubtitle}
@@ -113,7 +113,7 @@ export default async function LandingPage() {
       <section>
         <Reveal>
           <h2 className="text-center text-3xl font-bold tracking-tight">
-            {h.stepsTitleA} <span className="text-brand">{h.stepsTitleB}</span>
+            {h.stepsTitleA}<span className="text-brand">{h.stepsTitleB}</span>
           </h2>
         </Reveal>
 

@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { getLocale } from "@/lib/i18n";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], display: "swap" });
+const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: {
@@ -18,7 +18,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const locale = await getLocale();
   return (
     <html lang={locale} data-theme="light">
-      <body className={inter.className}>
+      <body className={inter.variable}>
         <div className="ambient" aria-hidden="true">
           <div className="ambient-blob pink" />
           <div className="ambient-blob sky" />

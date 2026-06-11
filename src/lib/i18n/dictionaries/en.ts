@@ -38,7 +38,7 @@ export const en = {
     viewSource: "View source",
     heroNote: "Free · Open source · Windows 10+",
 
-    featuresTitleA: "Everything in",
+    featuresTitleA: "Everything in ",
     featuresTitleB: "one place",
     featuresSubtitle: "The tedious parts of running a private server client, handled for you.",
     features: {
@@ -68,7 +68,7 @@ export const en = {
       },
     },
 
-    stepsTitleA: "Up and running in",
+    stepsTitleA: "Up and running in ",
     stepsTitleB: "three steps",
     steps: {
       download: {
@@ -201,12 +201,12 @@ export const en = {
     lastUpdated: "Last updated:",
     terms: {
       metaTitle: "Terms of Service",
-      titleA: "Terms of",
+      titleA: "Terms of ",
       titleB: "Service",
     },
     privacy: {
       metaTitle: "Privacy Policy",
-      titleA: "Privacy",
+      titleA: "Privacy ",
       titleB: "Policy",
     },
   },

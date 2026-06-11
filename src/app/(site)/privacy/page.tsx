@@ -13,7 +13,7 @@ export default async function PrivacyPage() {
 
   return (
     <LegalPage
-      title={<>{pp.titleA} <span className="text-brand">{pp.titleB}</span></>}
+      title={<>{pp.titleA}<span className="text-brand">{pp.titleB}</span></>}
       updated={updated}
     >
       {locale === "zh" ? <PrivacyZh /> : <PrivacyEn />}
