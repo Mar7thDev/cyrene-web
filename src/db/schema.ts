@@ -140,6 +140,10 @@ export const launcherTokens = pgTable("launcher_token", {
   deviceName: text("device_name"),
   deviceId: text("device_id"),
   lastIp: text("last_ip"),
+  // Server activation gate: the first server HWID that activates with this
+  // token binds to it; later activations from a different machine are rejected.
+  serverHwid: text("server_hwid"),
+  serverActivatedAt: timestamp("server_activated_at", { mode: "date" }),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   lastUsedAt: timestamp("last_used_at", { mode: "date" }),
   revokedAt: timestamp("revoked_at", { mode: "date" }),
