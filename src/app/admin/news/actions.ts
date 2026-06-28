@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { put } from "@vercel/blob";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 import { db } from "@/db";
 import { news } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin";
@@ -38,10 +39,13 @@ export async function saveNews(formData: FormData) {
   let coverUrl = String(formData.get("coverUrl") ?? "").trim() || null;
   const cover = formData.get("cover");
   if (cover instanceof File && cover.size > 0) {
-    const blob = await put(`covers/${crypto.randomUUID()}-${cover.name}`, cover, {
-      access: "public",
-    });
-    coverUrl = blob.url;
+    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), "data", "uploads");
+    const coversDir = path.join(uploadDir, "covers");
+    await mkdir(coversDir, { recursive: true });
+    const safeName = cover.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const fileName = `${crypto.randomUUID()}-${safeName}`;
+    await writeFile(path.join(coversDir, fileName), Buffer.from(await cover.arrayBuffer()));
+    coverUrl = `/uploads/covers/${fileName}`;
   }
 
   if (id) {
